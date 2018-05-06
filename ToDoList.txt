@@ -1,0 +1,3 @@
+pretty sure that only thing doesnt work is SW and LW now so ya know
+check those, pretty sure it works for all test cases not involving
+swaparea or SW and LW

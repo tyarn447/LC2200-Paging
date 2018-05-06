@@ -1,0 +1,4 @@
+IN $a0
+SW $a0 0x10($zero)
+LW $a1 0x10($zero)
+HALT

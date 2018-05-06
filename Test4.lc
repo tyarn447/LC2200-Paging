@@ -1,0 +1,5 @@
+IN $a0
+LOOP: IN $a1
+BEQ $a0 $a1 LOOP
+OUT $a0
+HALT

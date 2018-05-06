@@ -1,0 +1,2 @@
+NAND $a0 $zero $zero
+HALT

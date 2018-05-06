@@ -1,0 +1,4 @@
+IN $a0
+OUT $a0
+HALT
+

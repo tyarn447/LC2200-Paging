@@ -1,0 +1,426 @@
+Test1:
+./Simulate Test1.lc_config
+
+Shell:
+config
+Output:
+memory 1024
+stack 64
+mem-management firstfit
+timeslice 4
+pagesize 4
+swapspace 64
+paging FIFO
+
+Purpose:
+The purpose of this test case is to make sure that the configuration
+file is being read in correctly and the machine is reading that the
+paging type is the correct type which in this case would be fifo. It
+is also making sure that pagesize and swapspace are being read in
+correctly.
+____________________________________________________________________________________________
+Test2:
+./Simulate badPageSize.lc_config
+
+"Error, memory or stack or swapspace are not multiples of pagesize"
+
+Purpose:
+The purpose of this test case is to make sure that the program
+realizes when the memory/stack/swapspace is not a multiple of pagesize
+and does not start the simulator as a result.
+
+
+
+____________________________________________________________________________________________
+Test3
+./Simulate Test2.lc_config
+
+Shell:
+load Test2
+load Test2
+pages
+Memory:
+PPN:0 PID:1 VPN:0 stack
+PPN:1 PID:0 VPN:0 stack
+PPN:2 PID:1 VPN:0
+Swap:
+
+Purpose:
+The purpose of this test case is to make sure that the program is
+correctly not putting evicted pages into the swap space because they
+are not dirty.
+
+
+____________________________________________________________________________________________
+
+Test4:
+Sequence:012034
+Page size 1
+memory size 4
+step 6 so you dont hit halt
+For FIFO Queue will look like: 0,0s | 0,0s,1 | 0,0s,1,2 | 0,0s,1,2
+    	       	    	       0s,1,2,3 | 1,2,3,4   
+
+For LRU Queue will look like:  0,0s | 0,0s,1 | 0,0s,1,2 | 0s,1,2,0
+    	      	   	       1,2,0,3 | 2,0,3,4
+
+./Simulate Test5.lc_config //this is FIFO
+
+Shell:
+load Test10
+mem
+Adress:0, Hex:D3400008 (rest should be all 0)
+pages
+PPN:0 VPN:0 PID:0, PPN:1 VPN:0 PID:0 Stack
+step 6
+pages 0
+PID0: PPN:0 VPN:1 PID:0, PPN:1 VPN:2 PID:0, PPN:2 VPN:3 PID:0,
+PPN:3 VPN:4 PID:0
+pages
+PPN:0 VPN:1 PID:0, PPN:1 VPN:2 PID:0, PPN:2 VPN:3 PID:0,
+PPN:3 VPN:4 PID:0
+mem
+Address:0 Hex:0x23300001    Address:4 Hex:0x500FFFF4
+Address:8 Hex:0x03300004    Address:12 Hex:0x03300003
+
+Purpose:
+This test case has multiple purposes, the first purpose is to make
+sure that when we load in a program it only loads the first page of
+the program as well as the first page of stack. The next purpose is to
+make sure that the FIFO method works correctly. This can be seen when
+we step the program 6 times so it performs 6 instructions. Above I
+have what the FIFO Queue should look like at each step so it should
+look like that after 6 steps, we can also do 3 steps or any number of
+steps and the page function should show us the same thing.
+This test case also serves the purpose of making sure the page
+function works with or without a PID option, the page function should
+reflect the above FIFO queue correctly if we made everything
+correctly. This test case also makes sure that things get put into
+memory correctly and nothing goes wrong with the memory function.
+(Testing pages function for swaparea will come later, this is simply
+for no swap space)
+
+____________________________________________________________________________________________
+Test5:
+Sequence:012034
+Page size 1
+memory size 4
+step 6 so you dont hit halt
+For FIFO Queue will look like: 0,0s | 0,0s,1 | 0,0s,1,2 | 0,0s,1,2
+    	       	    	       0s,1,2,3 | 1,2,3,4   
+
+For LRU Queue will look like:  0,0s | 0,0s,1 | 0,0s,1,2 | 0s,1,2,0
+    	      	   	       1,2,0,3 | 2,0,3,4
+
+./Simulate Test6.lc_config //THIS IS FOR LRU
+
+Shell:
+load Test10
+step 6
+pages
+PPN:0 VPN:2 PID:0,
+PPN:1 VPN:0 PID:0,
+PPN:2 VPN:3 PID:0,
+PPN:3 VPN:4 PID:0
+mem
+Address:0 Hex:0x500FFFF4  Address:4 Hex:0xD3400008
+Address:8 Hex:0x03300004  Address:12 Hex:0x03300003
+
+Purpose:
+The purpose of this test case is to make sure that the LRU method of
+paging works correctly. When we step 6 times through this program and
+use the pages and mem function the output should be the same as it is
+here. We could also instead of stepping 6 times step 3 or 4 or however
+many times up to 6 and the page function should reflect the above LRU
+Queue for this program. It is also checking again that the program is
+putting the memory in correctly.
+
+
+____________________________________________________________________________________________
+Test6:
+./Simulate Test2.lc_config
+
+Shell:
+load Test10
+load Test1
+pages
+PPN:0 VPN:0 PID:1 stack
+PPN:1 VPN:0 PID:0 stack
+PPN:2 VPN:0 PID:1
+
+Purpose:
+The purpose of this test case is to make sure that the program
+correctly realizes that when loading in a new program we must get
+space for page0 of the new program and its stack, it then should
+correctly get rid of the first thing in the queue which would be VPN:0
+of PID:0 as that is the first thing loaded in.
+
+____________________________________________________________________________________________
+Test7:
+./Simulate Test2.lc_config
+
+Shell:
+load Test1
+step 2
+PID0:?
+5
+PID0:5
+pages
+PPN:0 VPN:0 PID:0
+PPN:1 VPN:0 PID:0 stack
+PPN:2 VPN:1 PID:0
+
+Purpose:
+The purpose of this test case is to make sure that the program
+correctly runs and gives a page to just 1 instruction when the
+pagesize is 2, as there are 3 instructions for Test1, there would be 2
+pages for it, one with 2 instructions and 1 with 1 instruction in
+it. So this test case is simply making sure that this works, it also
+makes sure that the in and out function works correctly with
+everything that has been implemented so far.
+(actually there will be no pages as it halts and so pages go away whoops) 
+____________________________________________________________________________________________
+Test8:
+./Simulate Test1.lc_config
+
+Shell:
+load Test10
+load Test10
+kill 0
+pages
+PPN:2 VPN:0 PID:1
+PPN:3 VPN:0 PID:1 stack
+
+Purpose:
+The purpose of this test case is to make sure that the kill function
+gets rid of the correct PIDs in the pagetable.
+
+____________________________________________________________________________________________
+Test9:
+./Simulate Test1.lc_config
+
+Shell:
+load Test10
+step 1
+load Test10
+jobs
+Test10.lce PID:1 PC:0
+Number of words:10
+Timeslices:0
+Page Faults:2
+
+Test10.lce PID:0 PC:12
+Number of words:10
+Timeslices:1
+PageFaults:2
+
+
+Purpose:
+The purpose of this test case is to make sure that the jobs function
+prints out the correct stuff, and to also make sure that the PCB is
+correctly tracking how many timeslices have been performed on this
+Process and the amount of pagefaults it has encountered.
+
+____________________________________________________________________________________________
+
+____________________________________________________________________________________________
+Test10:
+./Simulate Test3.lc_config
+
+Shell:
+load Test11
+load Test11
+load Test11
+step 3
+
+pages
+memory:
+PPN:0 PID:2 VPN:0 stack
+PPN:1 PID:1 VPN:0 stack
+PPN:2 PID:2 VPN:0
+PPN:3 PID:0 VPN:0 stack
+swap:
+
+//at this point all stacks are dirty
+load Test11
+pages
+memory:
+PPN:0 PID:2 VPN:0 stack
+PPN:1 PID:1 VPN:0 stack
+PPN:2 PID:3 VPN:0
+PPN:3 PID:3 VPN:0 stack
+swap:
+PPN:0 PID:0 VPN:0 stack
+
+pages 0
+memory:
+swap:
+PPN:0 PID:0 VPN:0 stack
+
+step 1
+pages
+PPN:0 PID:2 VPN:0 stack
+PPN:1 PID:1 VPN:0 stack
+PPN:2 PID:0 VPN:0
+PPN:3 PID:0 VPN:0 stack
+
+Purpose:
+This test case has multiple purposes to do with paging and the swap
+area and the pages command. After we load Test11 in three times and
+step through each program 1 instruction, so step 3 with timeslice 1,
+the pages of memory should look exactly like the one shown. Then when
+we load in Test11 again we must find space for 2 pages, but since
+there are only 4 pages avaiable and 3 are dirty we must put 1 dirty
+page into swap space. Therefore we remove one of the dirty pages, PID0
+stack in this case because has been in queue the longest, and move it
+to swap area so we can load in Test11 which will be PID3. We can see
+that exactly this happens when we use the next pages command. Swap
+area has PID:0 stack. Then we step 1 again so PID:0 will be at front
+of queue so we must load PID:0 stack back from the swap area, so it is
+also checking that loading back from the swap area works correctly and
+this happens without anything going to swap area because PID3 VPN0:
+and stack0 were both clean.
+*******
+Summary:Tests that moving to swaparea when there is not enough space
+works when loading programs, tests that loading back from swaparea
+works correctly and that program recognizes the need for this. Finally
+tests that pages command works correctly with swaparea with or without
+PID option specified. As such you can test this test case in parts as
+it can be broken up.
+____________________________________________________________________________________________
+Test11
+./Simulate Test3.lc_config
+
+Shell:
+load Test11
+load Test11
+load Test11
+load Test11
+load Test11
+step 5
+pages
+Memory:
+PPN:0 PID:2 VPN:0 Stack
+PPN:1 PID:4 VPN:0 Stack
+PPN:2 PID:4 VPN:0
+PPN:3 PID:3 VPN:0 Stack
+Swap:
+PPN:0 PID:0 VPN:0 Stack
+PPN:1 PID:1 VPN:0 Stack
+
+load Test11
+Error:"There is insufficient space to load this program"
+
+Purpose:
+This test case is formatted much like the last one, the purpose of
+this test case is to simply fill up memory and swap area with dirty
+pages so that when we try to load a new program in, where we must load
+both VPN0 and Stack0 of the program, that it realizes that Memory is
+full and swap space is full so we cant load it in and it outputs the
+correct error message. This test case also makes sure that the program
+correctly recognizes when there is not enough free space and something
+must go to the swap area and it goes to swap area correctly.
+
+
+
+____________________________________________________________________________________________
+Test 12:
+./Simulate Test4.lc_config
+
+Shell:
+load Test12
+step 1
+In:14
+cpu
+PC:0xc(12), 
+$zero :0(0), $at :0(0), v0 :0(0), a0 :0xE(14), 
+a1 :0XE(14), a2 :0(0), t0 :0(0), t1 :0(0), 
+t2 :0(0), s0 :0(0), s1 :0(0), s2 :0(0), 
+k0 :0(0), sp :0x108(264), fp :0(0), ra :0(0),
+(basically a0 and a1 have 14 in registers)
+mem
+(somewhere in mem, wherever stack 0 for PID0 is there will be a number
+12 there)
+
+Purpose:
+The purpose of this test case is to make sure that when we step
+through a program using SW and LW commands that the commands work
+correctly and that it loads the word into the correct place in
+memory. Essentially making sure SW and LW work right.
+
+____________________________________________________________________________________________
+Test13
+./Simulate Test7.lc_config
+//note that swaparea size is 0
+
+Shell:
+load Test13
+load Test13
+load Test13
+load Test13
+
+step 4
+Error:"Insufficient Memory"
+
+Purpose:
+The purpose of this test case is to make sure that when load is not
+involved, the program still correctly recognizes when there is no
+space to load another program page into memory because it is too full
+of dirty pages.
+____________________________________________________________________________________________
+Test14:
+./Simulate Test3.lc_config
+
+Shell:
+load Test11
+load Test11
+load Test11
+load Test11
+load Test11
+step 5
+pages
+Memory:
+PPN:0 PID:2 VPN:0 Stack
+PPN:1 PID:4 VPN:0 Stack
+PPN:2 PID:4 VPN:0
+PPN:3 PID:3 VPN:0 Stack
+Swap:
+PPN:0 PID:0 VPN:0 Stack
+PPN:1 PID:1 VPN:0 Stack
+(up until here this is Test11)
+
+kill 0
+
+pages
+Memory:
+PPN:0 PID:2 VPN:0 Stack
+PPN:1 PID:4 VPN:0 Stack
+PPN:2 PID:4 VPN:0
+PPN:3 PID:3 VPN:0 Stack
+Swap:
+PPN:1 PID:1 VPN:0 Stack
+
+Purpose:
+The purpose of this test case is to simply test that the kill command
+works with the swap area as well as the Memory area of pages. We can
+also then assume that when halting a program it will scrub the swap
+area as well of the PID because halt essentially performs a kill.
+
+
+____________________________________________________________________________________________
+Test15:
+./Simulate Test1.lc_config
+
+Shell:
+load Test1
+load Test2
+pages 3
+" "
+(nothing)
+
+Purpose:
+The purpose of this test case is to make sure that the program
+realizes when a PID is specified that is not in frametable or swap
+area and outputs an appropriate message. 
+
+

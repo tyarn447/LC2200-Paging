@@ -1,0 +1,8 @@
+memory 4
+stack 1
+mem-management 1
+timeslice 1
+pagesize 1
+swapspace 64
+paging 0
+

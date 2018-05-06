@@ -1,0 +1,3 @@
+SW $a0 0x12($zero)
+LW $a0 0x12($zero)
+HALT

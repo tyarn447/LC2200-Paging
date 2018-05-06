@@ -1,0 +1,4 @@
+IN $a0
+ADDI $a0 $a0 5
+OUT $a0
+HALT

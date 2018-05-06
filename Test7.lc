@@ -1,0 +1,3 @@
+IN $a0
+JALR $a0 $a1
+HALT

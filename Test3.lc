@@ -1,0 +1,5 @@
+IN $a0
+IN $a1
+ADD $a0 $a0 $a1
+OUT $a0
+HALT

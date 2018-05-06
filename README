@@ -1,0 +1,32 @@
+Author: Taylor Yarn
+
+Compiling:
+To compile this file, one must first navigate to the directory
+tyarn-Paging-No-Swap from the command line. After one has navigated to
+this directory, simply typemake to compile the program correctly. 
+
+Running the program:
+To run this program you must, after compiling, type the command ./Simulate Test1.lc_config
+where where Test1.lc_config represents any file with the extension .lc_config, I
+have included some .lc_config files to Test testcases with.
+However to load any programs onto this simulated machine you must have appropriate
+files to do so, I have included some of these files as Test cases to
+test my machine.
+
+What works In respect to the program Assignment:
+In respect to the program Assignment, everything to my knowledge works
+in accordance with the program assignment up to this point, where we
+are not using swap area yet. To elaborate, the simulator correctly
+performs LRU or FIFO paging techniques(Test4/5),depending on which is
+specified, The program also correctly kills pages(Test8) in the usedPages
+queue that contain a PID of a process that is halting or being
+killed. The program also correctly keeps track of the number of
+timeslices and pagefaults for each PCB and prints them out when a
+program has halted(almost any testcase).It also correctly prints out the pages of the
+program in the order that they are in in the queue and correctly
+prints the things specified for the jobs command. It also correctly
+will error out if memory is full of dirty pages and it cant load
+anymore in to memory.
+
+The testcases that are used to test that each thing is working in my
+program is held tyarn-paging-testcases/TestCases.txt

@@ -1,0 +1,6 @@
+IN $a0
+IN $a1 
+SW $a0 0x0($a1)
+LA $t0 LABEL
+LW $a2 0x0($a1)
+LABEL: HALT

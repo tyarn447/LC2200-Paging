@@ -1,0 +1,7 @@
+memory 1024
+stack 64
+mem-management 0
+timeslice 4
+pagesize 3
+swap space 64
+paging 0
